@@ -1,0 +1,14 @@
+*.bat
+.htaccess
+
+xeno/**
+src/**
+test/**
+node_modules
+
+-p
+
+npm-debug.log
+!*.gitkeep
+
+pg
