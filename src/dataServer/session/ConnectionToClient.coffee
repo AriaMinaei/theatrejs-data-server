@@ -39,7 +39,7 @@ module.exports = class ConnectionToClient
 
 		console.log 'got requested for auth'
 
-		{password, namespace} = data
+		{passphrase, namespace} = data
 
 		unless @session._validateNamespace namespace
 
@@ -49,13 +49,13 @@ module.exports = class ConnectionToClient
 
 		console.log 'setting namespace to', namespace
 
-		unless @session._validatePasswordForNamespace namespace, password
+		unless @session._validatePassphrase passphrase
 
-			console.log 'invalid password:', password
+			console.log 'invalid passphrase:', passphrase
 
-			return cb 'invalid-password'
+			return cb 'invalid-passphrase'
 
-		console.log 'authenticated with:', password
+		console.log 'authenticated with:', passphrase
 
 		cb 'accepted'
 

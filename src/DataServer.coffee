@@ -5,13 +5,13 @@ io = require 'socket.io'
 
 module.exports = class DataServer
 
-	constructor: (rootPath, timelinesDir, port, acceptablePasswords) ->
+	constructor: (rootPath, timelinesDir, port, acceptablePassphrase) ->
 
 		@dataHandler = new DataHandler @, rootPath, timelinesDir
 
 		@_setPort port
 
-		@_setAcceptablePasswords acceptablePasswords
+		@_setAcceptablePassphrase acceptablePassphrase
 
 		do @_setupSocket
 
@@ -25,17 +25,11 @@ module.exports = class DataServer
 
 			throw Error "Port must be an integer over 3000"
 
-	_setAcceptablePasswords: (@acceptablePasswords) ->
+	_setAcceptablePassphrase: (@acceptablePassphrase) ->
 
-		unless Array.isArray(@acceptablePasswords) and @acceptablePasswords.length > 0
+		unless typeof @acceptablePassphrase is 'string' and @acceptablePassphrase.length > 0
 
-			throw Error "acceptablePasswords must be an array of strings"
-
-		for pass in @acceptablePasswords
-
-			unless typeof pass is 'string' and pass.length > 0
-
-				throw Error "Invalid password in acceptablePasswords: '#{pass}'"
+			throw Error "Invalid passphrase: '#{@acceptablePassphrase}'"
 
 		return
 

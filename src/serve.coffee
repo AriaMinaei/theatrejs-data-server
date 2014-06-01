@@ -1,6 +1,6 @@
 didServe = no
 
-module.exports = serve = (repoPath, port, serializedDirName, passwords, logsPath) ->
+module.exports = serve = (repoPath, port, serializedDirName, passphrase, logsPath) ->
 
 	if didServe
 
@@ -64,4 +64,4 @@ module.exports = serve = (repoPath, port, serializedDirName, passwords, logsPath
 
 			console.log "\n-----------------------\n"
 
-			s = new DataServer repoPath, serializedDirName, port, passwords
+			s = new DataServer repoPath, serializedDirName, port, passphrase

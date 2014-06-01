@@ -22,9 +22,9 @@ module.exports = class Session
 
 		@dataHandler.hasNamespace namespace
 
-	_validatePasswordForNamespace: (namespace, password) ->
+	_validatePassphrase: (passphrase) ->
 
-		password in @server.acceptablePasswords
+		passphrase is @server.acceptablePassphrase
 
 	_setNamespace: (@namespaceName) ->
 
