@@ -4,8 +4,6 @@ module.exports = class ConnectionToClient
 
 		@id = @session.id
 
-		@_isAuthenticated = no
-
 		@_requestListeners = {}
 
 		console.log "connection: #{@id}"
@@ -25,43 +23,67 @@ module.exports = class ConnectionToClient
 		# get redy for disconnect
 		@socket.on 'disconnect', @_handleDisconnect
 
-		@socket.emit 'server-asks:send-auth-data', @id
-
-		@socket.on 'client-asks:get-auth-data', @_getAuthData
-
 	_handleDisconnect: =>
 
 		console.log "disconnected: #{@id}"
 
 		do @session._disconnect
 
-	_getAuthData: (data, cb) =>
+	# _getAuthData: (data, cb) =>
 
-		console.log 'got requested for auth'
+	# 	console.log 'got requested for auth'
 
-		{passphrase, namespace} = data
+	# 	{passphrase, namespace} = data
 
-		unless @session._validateNamespace namespace
+	# 	unless @session._validateNamespace namespace
 
-			console.log 'invalid namespace:', namespace
+	# 		console.log 'invalid namespace:', namespace
 
-			return cb 'invalid-namespace'
+	# 		return cb 'invalid-namespace'
 
-		console.log 'setting namespace to', namespace
+	# 	console.log 'setting namespace to', namespace
 
-		unless @session._validatePassphrase passphrase
+	# 	unless @session._validatePassphrase passphrase
 
-			console.log 'invalid passphrase:', passphrase
+	# 		console.log 'invalid passphrase:', passphrase
 
-			return cb 'invalid-passphrase'
+	# 		return cb 'invalid-passphrase'
 
-		console.log 'authenticated with:', passphrase
+	# 	console.log 'authenticated with:', passphrase
 
-		cb 'accepted'
+	# 	cb 'accepted'
 
-		@session._setNamespace namespace
+	# 	@session._setNamespace namespace
 
-		@_isAuthenticated = yes
+	_croodsAreRight: (data) ->
+
+		unless typeof data is 'object'
+
+			console.log 'received data is not an object'
+
+			return no
+
+		croods = data.croods
+
+		unless croods?
+
+			console.log 'received data doesn\'t have croods'
+
+			return no
+
+		unless @session._validatePassphrase croods.passphrase
+
+			console.log "invalid passphrase: '#{croods.passphrase}'"
+
+			return no
+
+		unless @session._validateNamespace croods.namespace
+
+			console.log "invalid namespace: '#{croods.namespace}'"
+
+			return no
+
+		return yes
 
 	_receiveClientRequest: (msg, data, cb) =>
 
@@ -69,11 +91,11 @@ module.exports = class ConnectionToClient
 
 		console.log 'got requested for', what
 
-		unless @_isAuthenticated
+		unless @_croodsAreRight data
 
-			console.log 'not authenticated yet'
+			cb 'error:bad-croods'
 
-			return cb 'error:auth-required'
+			return
 
 		listener = @_requestListeners[what]
 
@@ -81,7 +103,7 @@ module.exports = class ConnectionToClient
 
 			throw Error "No ask listener was found for '#{what}'"
 
-		listener data, cb, what
+		listener data.data, data.croods.namespace, cb, what
 
 	whenRequestedFor: (what, cb) ->
 

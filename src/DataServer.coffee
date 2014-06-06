@@ -5,9 +5,9 @@ io = require 'socket.io'
 
 module.exports = class DataServer
 
-	constructor: (rootPath, timelinesDir, port, acceptablePassphrase) ->
+	constructor: (rootPath, dataDir, port, acceptablePassphrase) ->
 
-		@dataHandler = new DataHandler @, rootPath, timelinesDir
+		@dataHandler = new DataHandler @, rootPath, dataDir
 
 		@_setPort port
 

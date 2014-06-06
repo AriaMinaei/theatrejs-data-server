@@ -1,32 +1,36 @@
 fs = require 'graceful-fs'
-wn = require 'when'
-git = require 'gift'
-CSON = require 'cson'
-delay = require 'when/delay'
-nodefn = require 'when/node/function'
+Queue = require './dataHandler/Queue'
 sysPath = require 'path'
+Namespace = require './dataHandler/Namespace'
+GitHandler = require './dataHandler/GitHandler'
 
 module.exports = class DataHandler
 
-	constructor: (@server, rootPath, timelinesDir) ->
+	constructor: (@server, rootPath, dataDir) ->
 
-		@_setPaths rootPath, timelinesDir
+		@queue = new Queue
 
-		@_lastPromiseToWorkWithHeadData = wn()
+		@_setPaths rootPath, dataDir
 
-	_setPaths: (@rootPath, @timelinesDir) ->
+		do @_setupNamespaces
 
-		unless String(@timelinesDir).length > 0
+		@gitHandler = new GitHandler @
 
-			throw Error "@timelinesDir '#{@timelinesDir}' is not valid"
+	_setPaths: (@rootPath, @dataDir) ->
 
-		@timelinesPath = sysPath.join @rootPath, @timelinesDir
+		unless String(@dataDir).length > 0
 
-		unless fs.existsSync @timelinesPath
+			throw Error "dataDir '#{@dataDir}' is not valid"
 
-			throw Error "Timelines path '#{@timelinesPath}' doesn't exist"
+		@dataPath = sysPath.join @rootPath, @dataDir
 
-		namespaces = fs.readdirSync @timelinesPath
+		unless fs.existsSync @dataPath
+
+			throw Error "Timelines path '#{@dataPath}' doesn't exist"
+
+	_setupNamespaces: ->
+
+		namespaces = fs.readdirSync @dataPath
 
 		@namespaces = []
 
@@ -40,115 +44,34 @@ module.exports = class DataHandler
 
 			nsName = namespace.substr(0, namespace.length - 5)
 
-			console.log "recognized namespace", nsName
-
-			@namespaces.push nsName
+			@_recognizeNamespace nsName
 
 		if @namespaces.length is 0
 
 			throw Error "No namespace cson file was found"
 
-		do @_initGit
+		return
+
+	_recognizeNamespace: (name) ->
+
+		console.log "recognized namespace", name
+
+		@namespaces.push new Namespace @, name
 
 		return
 
-	_initGit: ->
+	hasNamespace: (name) ->
 
-		unless fs.existsSync @rootPath + '/.git'
+		for ns in @namespaces
 
-			throw Error "Git repo is not initialized yet"
+			return yes if ns.name is name
 
-		@repo = git @rootPath
+		no
 
-		unless @repo?
+	getNamespace: (name) ->
 
-			throw Error "Could not get a repo from gift"
+		for ns in @namespaces
 
-		do @_scheduleToCommit
-
-	_scheduleToCommit: ->
-
-		delay(5 * 60 * 1000)
-		.then =>
-
-			@queue =>
-
-				do @_scheduleToCommit
-
-				nodefn.call(@repo.status.bind(@repo))
-				.then (status) =>
-
-					if status.clean is yes
-
-						console.log 'no need to commit'
-
-						return
-
-					nodefn.call(@repo.add.bind(@repo), '.')
-					.then =>
-
-						nodefn.call(@repo.commit.bind(@repo), '[autosave]', all: yes)
-
-					.then =>
-
-						console.log 'commited'
+			return ns if ns.name is name
 
 		return
-
-	hasNamespace: (ns) ->
-
-		ns in @namespaces
-
-	getHeadDataForNamespace: (ns) ->
-
-		unless @hasNamespace ns
-
-			throw Error "Invalid namespace '#{ns}'"
-
-		nodefn.call(fs.readFile, @getDataFilePathFor(ns), {encoding: 'utf-8'})
-		.then (cson) =>
-
-			if (cson.replace /\s+/, '') is ''
-
-				return {}
-
-			obj = CSON.parseSync cson
-
-			if obj instanceof Error
-
-				console.log obj
-
-				throw obj
-
-			obj
-
-	queue: (cb) ->
-
-		@_lastPromiseToWorkWithHeadData = @_lastPromiseToWorkWithHeadData.then cb
-
-	replaceHeadDataForNamespace: (ns, obj) ->
-
-		cson = CSON.stringifySync obj
-
-		json = @trimData obj
-
-		first = nodefn.call(fs.writeFile, @getDataFilePathFor(ns), cson, {encoding: 'utf-8'})
-		second = nodefn.call(fs.writeFile, @getTrimmedDataFilePathFor(ns), json, {encoding: 'utf-8'})
-
-		wn.all([first, second])
-
-	trimData: (obj) ->
-
-		timeline = obj?.timeline
-
-		timeline ?= {}
-
-		JSON.stringify timeline
-
-	getDataFilePathFor: (ns) ->
-
-		sysPath.join @timelinesPath, ns + '.cson'
-
-	getTrimmedDataFilePathFor: (ns) ->
-
-		sysPath.join @timelinesPath, ns + '.json'

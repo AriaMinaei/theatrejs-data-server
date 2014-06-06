@@ -6,8 +6,6 @@ module.exports = class Session
 
 		@dataHandler = @server.dataHandler
 
-		@namespaceName = null
-
 		@connection = new ConnectionToClient @, socket
 
 		@connection.whenRequestedFor 'head-data', @_sendHeadData
@@ -26,48 +24,25 @@ module.exports = class Session
 
 		passphrase is @server.acceptablePassphrase
 
-	_setNamespace: (@namespaceName) ->
+	_sendHeadData: (received, namespace, cb) =>
 
-	_sendHeadData: (received, cb) =>
+		@dataHandler
+		.getNamespace(namespace)
+		.getHeadData()
+		.then (data) ->
 
-		@dataHandler.queue =>
-
-			@dataHandler.getHeadDataForNamespace(@namespaceName)
-			.then (data) =>
-
-				cb data
+			cb data
 
 		return
 
-	_replacePartOfHead: (parts, cb) =>
+	_replacePartOfHead: (parts, namespace, cb) =>
 
 		{address, newData} = parts
 
-		@dataHandler.queue =>
+		@dataHandler
+		.getNamespace(namespace)
+		.replacePartOfHead address, newData
 
-			@dataHandler.getHeadDataForNamespace(@namespaceName)
-			.then (obj) =>
+		cb 'done'
 
-				cur = obj
-
-				lastName = address.pop()
-
-				for subName in address
-
-					if cur[subName]?
-
-						cur = cur[subName]
-
-					else
-
-						cur[subName] = cur = {}
-
-						console.log "Couldn't find subName '#{subName}' in cson data"
-
-				cur[lastName] = newData
-
-				promise = @dataHandler.replaceHeadDataForNamespace(@namespaceName, obj)
-
-				cb 'done'
-
-				promise
+		return
