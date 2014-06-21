@@ -1,13 +1,10 @@
 {
   "name": "theatrejs-data-server",
-  "version": "0.0.0",
+  "version": "0.1.0-dev.1",
   "description": "The data server module for theatrejs",
   "main": "lib/DataServer.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "mocha test/**/*.coffee"
+    "prepublish": "coffee --bare --compile --output ./lib ./src"
   },
   "repository": {
     "type": "git",
