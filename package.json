@@ -1,6 +1,6 @@
 {
   "name": "theatrejs-data-server",
-  "version": "0.1.0-dev.1",
+  "version": "0.1.0-dev.2",
   "description": "The data server module for theatrejs",
   "main": "lib/DataServer.js",
   "scripts": {
@@ -18,12 +18,12 @@
     "mocha": "^1.20.0"
   },
   "dependencies": {
-    "cson": "^1.6.0",
-    "gift": "^0.4.1",
-    "graceful-fs": "^2.0.3",
+    "cson": "1.6.0",
+    "gift": "0.4.1",
+    "graceful-fs": "2.0.3",
     "pretty-error": "^1.1.1",
     "pretty-monitor": "^0.3.2",
-    "socket.io": "^0.9.16",
-    "when": "^3.2.2"
+    "socket.io": "0.9.16",
+    "when": "3.2.2"
   }
 }
