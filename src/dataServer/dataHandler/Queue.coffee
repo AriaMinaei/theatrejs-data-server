@@ -1,4 +1,4 @@
-Emitter = require 'utila/scripts/js/lib/Emitter'
+Emitter = require 'utila/lib/Emitter'
 wn = require 'when'
 
 module.exports = class Queue extends Emitter

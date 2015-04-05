@@ -10,7 +10,7 @@ module.exports = class ConnectionToClient
 
 		$emit = @socket.$emit
 
-		socket.$emit = (msg, data, cb) =>
+		@socket.$emit = (msg, data, cb) =>
 
 			if msg.substr(0, 15) is 'client-requests'
 
@@ -18,7 +18,7 @@ module.exports = class ConnectionToClient
 
 				return
 
-			$emit.apply socket, arguments
+			$emit.apply @socket, arguments
 
 		# get redy for disconnect
 		@socket.on 'disconnect', @_handleDisconnect
@@ -28,32 +28,6 @@ module.exports = class ConnectionToClient
 		console.log "disconnected: #{@id}"
 
 		do @session._disconnect
-
-	# _getAuthData: (data, cb) =>
-
-	# 	console.log 'got requested for auth'
-
-	# 	{passphrase, namespace} = data
-
-	# 	unless @session._validateNamespace namespace
-
-	# 		console.log 'invalid namespace:', namespace
-
-	# 		return cb 'invalid-namespace'
-
-	# 	console.log 'setting namespace to', namespace
-
-	# 	unless @session._validatePassphrase passphrase
-
-	# 		console.log 'invalid passphrase:', passphrase
-
-	# 		return cb 'invalid-passphrase'
-
-	# 	console.log 'authenticated with:', passphrase
-
-	# 	cb 'accepted'
-
-	# 	@session._setNamespace namespace
 
 	_croodsAreRight: (data) ->
 

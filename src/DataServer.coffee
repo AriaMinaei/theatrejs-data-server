@@ -1,6 +1,6 @@
 DataHandler = require './dataServer/DataHandler'
 Session = require './dataServer/Session'
-array = require 'utila/scripts/js/lib/array'
+array = require 'utila/lib/array'
 io = require 'socket.io'
 
 module.exports = class DataServer

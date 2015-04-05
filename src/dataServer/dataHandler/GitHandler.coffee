@@ -1,7 +1,7 @@
-nodefn = require 'when/node/function'
-fs = require 'graceful-fs'
-git = require 'gift'
-delay = require 'when/delay'
+# nodefn = require 'when/node/function'
+# fs = require 'graceful-fs'
+# git = require 'gift'
+# delay = require 'when/delay'
 
 module.exports = class GitHandler
 
@@ -9,17 +9,17 @@ module.exports = class GitHandler
 
 		@queue = @dataHandler.queue
 
-		unless fs.existsSync @dataHandler.rootPath + '/.git'
+		# unless fs.existsSync @dataHandler.rootPath + '/.git'
 
-			throw Error "Git repo is not initialized yet"
+		# 	throw Error "Git repo is not initialized yet"
 
-		@repo = git @dataHandler.rootPath
+		# @repo = git @dataHandler.rootPath
 
-		unless @repo?
+		# unless @repo?
 
-			throw Error "Could not get a repo from gift"
+		# 	throw Error "Could not get a repo from gift"
 
-		do @_scheduleToCommit
+		# do @_scheduleToCommit
 
 	_scheduleToCommit: ->
 
